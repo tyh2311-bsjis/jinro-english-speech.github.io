@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎤 영어 스피치 수행평가 연습</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Malgun Gothic','Apple SD Gothic Neo',system-ui,sans-serif;background:#F8FAFC;color:#1E293B;min-height:100vh}
+.header{background:#4F46E5;color:#fff;padding:15px 18px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header h1{font-size:15px;font-weight:700}
+.header .sub{font-size:11px;opacity:0.8;margin-top:2px}
+.streak{background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500}
+.tabs{display:flex;background:#fff;border-bottom:1px solid #E2E8F0;position:sticky;top:56px;z-index:99}
+.tab{flex:1;padding:11px 4px;font-size:13px;font-weight:500;color:#64748B;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .15s;font-family:inherit}
+.tab.active{color:#4F46E5;border-bottom-color:#4F46E5}
+.content{padding:14px;display:none}.content.active{display:block}
+.card{background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:16px;margin-bottom:12px}
+.lbl{font-size:12px;font-weight:500;color:#64748B;margin-bottom:7px}
+.section-title{font-size:13px;font-weight:700;color:#1E293B;margin-bottom:10px}
+textarea,input[type=number]{border:1px solid #E2E8F0;border-radius:8px;padding:9px 11px;font-family:inherit;font-size:13px;outline:none;color:#1E293B;background:#F8FAFC;transition:border .2s}
+textarea{resize:vertical;min-height:75px;width:100%}
+textarea:focus,input:focus{border-color:#4F46E5}
+input[type=number]{width:65px;text-align:center}
+.btn{border:none;border-radius:8px;padding:9px 16px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-pri{background:#4F46E5;color:#fff}.btn-pri:hover{background:#3730A3}
+.btn-pri:disabled{background:#94A3B8;cursor:not-allowed}
+.btn-out{background:#fff;color:#4F46E5;border:1.5px solid #4F46E5}.btn-out:hover{background:#EEF2FF}
+.btn-red{background:#EF4444;color:#fff;border:none}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.record-area{border:2px dashed #E2E8F0;border-radius:12px;padding:20px;text-align:center;transition:all .2s;margin-bottom:9px}
+.record-area.rec-on{border-color:#EF4444;background:#FEF2F2}
+.wave{display:flex;align-items:center;justify-content:center;gap:3px;height:36px}
+.wave-bar{width:3px;background:#EF4444;border-radius:2px}
+@keyframes wv{from{transform:scaleY(0.3)}to{transform:scaleY(1)}}
+.score-wrap{position:relative;width:110px;height:110px;flex-shrink:0}
+.score-inner{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.pbar-wrap{height:7px;background:#E2E8F0;border-radius:4px;overflow:hidden;margin-top:5px}
+.pbar-fill{height:100%;border-radius:4px;transition:width 0.8s cubic-bezier(.4,0,.2,1)}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.tag-g{background:#ECFDF5;color:#065F46}.tag-y{background:#FFFBEB;color:#92400E}
+.tag-r{background:#FEF2F2;color:#991B1B}.tag-b{background:#EEF2FF;color:#3730A3}
+.sound-card{background:#EEF2FF;border-radius:8px;padding:9px 11px}
+.ipa{font-family:monospace;font-size:15px;color:#4F46E5;font-weight:700}
+.fb-box{background:#F8FAFC;border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;color:#64748B}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pass-banner{border-radius:12px;padding:16px;text-align:center;margin-bottom:12px}
+.pass-banner.pass{background:#ECFDF5;border:2px solid #10B981}
+.pass-banner.fail{background:#FEF2F2;border:2px solid #EF4444}
+.pass-banner h2{font-size:18px;font-weight:700;margin-bottom:5px}
+.tip-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.tip-list li{font-size:13px;padding:8px 11px;background:#F8FAFC;border-radius:6px;line-height:1.6;display:flex;gap:8px}
+.loading{display:flex;flex-direction:column;align-items:center;padding:30px 0;gap:11px}
+.spinner{width:34px;height:34px;border:3px solid #E2E8F0;border-top-color:#4F46E5;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rubric-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #E2E8F0;font-size:13px}
+.rubric-row:last-child{border-bottom:none}
+.attempt-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid #E2E8F0}
+.attempt-row:last-child{border-bottom:none}
+.best-badge{background:linear-gradient(135deg,#F59E0B,#EF4444);color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700}
+.transcript-box{background:#F1F5F9;border-radius:8px;padding:11px;font-size:13px;line-height:1.7;border:1px solid #E2E8F0;color:#1E293B;margin-top:4px}
+.empty{text-align:center;padding:28px 0;color:#94A3B8}
+.empty .ico{font-size:34px;margin-bottom:9px}
+.hidden{display:none}
+.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.notice{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 13px;font-size:12px;color:#166534;line-height:1.7;margin-bottom:12px}
+.diff-del{background:#FEE2E2;color:#991B1B;border-radius:3px;padding:1px 3px;text-decoration:line-through;font-size:12px}
+
+/* ───── 모델링 스크립트 ───── */
+.modeling-wrap{background:#FAFAF5;border:1.5px solid #D6D4A0;border-radius:12px;padding:18px 20px;font-size:15px}
+.m-line{display:flex;flex-wrap:wrap;align-items:center;gap:5px;padding:8px 0;border-bottom:1px dashed #E8E6B0;line-height:1.6}
+.m-line:last-child{border-bottom:none;padding-bottom:0}
+.m-line:first-child{padding-top:0}
+/* 일반 단어 */
+.mw{font-size:15px;color:#334155}
+/* 강세 단어 */
+.ms{display:inline-block;background:#FEF3C7;color:#92400E;font-weight:800;font-size:16px;border-radius:6px;padding:2px 8px;border-bottom:3px solid #F59E0B;box-shadow:0 1px 3px rgba(245,158,11,0.18);line-height:1.4}
+/* 구두점 */
+.mp{font-size:15px;color:#94A3B8;margin-left:-3px}
+/* 올라가는 억양 */
+.mu{display:inline-flex;align-items:center;gap:3px;color:#1D4ED8;font-weight:700;font-size:13px;background:#DBEAFE;border-radius:20px;padding:3px 10px;border:1px solid #93C5FD;white-space:nowrap}
+/* 내려가는 억양 */
+.md{display:inline-flex;align-items:center;gap:3px;color:#6D28D9;font-weight:700;font-size:13px;background:#EDE9FE;border-radius:20px;padding:3px 10px;border:1px solid #C4B5FD;white-space:nowrap}
+/* 포즈 마커 */
+.mpause{display:inline-flex;align-items:center;justify-content:center;color:#94A3B8;font-size:18px;font-weight:300;margin:0 2px;line-height:1}
+.modeling-legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;padding:8px 12px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;font-size:11px;color:#64748B}
+.modeling-legend .li{display:flex;align-items:center;gap:5px}
+
+/* ───── 단어 강세 카드 ───── */
+.stress-card{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.stress-syllables{display:flex;gap:3px;align-items:flex-end}
+.syl-box{display:flex;flex-direction:column;align-items:center;gap:3px}
+.syl-t{padding:4px 9px;border-radius:5px;font-size:14px;font-weight:500;border:1px solid #E2E8F0;background:#fff;color:#475569}
+.syl-t.strong{background:#4F46E5;color:#fff;font-weight:800;font-size:15px;border-color:#4F46E5;box-shadow:0 2px 6px rgba(79,70,229,0.25)}
+.syl-dot{width:5px;height:5px;border-radius:50%}
+.syl-dot.strong{background:#4F46E5}.syl-dot.weak{background:#CBD5E1}
+.stress-word{font-size:12px;color:#64748B;font-weight:500}
+.stress-tip{font-size:11px;color:#94A3B8;text-align:center;max-width:120px;line-height:1.4}
+.tts-btn{background:#EEF2FF;color:#4F46E5;border:1px solid #C7D2FE;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:all .15s}
+.tts-btn:hover{background:#4F46E5;color:#fff}
+.tts-btn.playing{background:#4F46E5;color:#fff;animation:pulse .8s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>🎤 스피치 수행평가 연습</h1>
+    <div class="sub">English Speech Practice Trainer · 무료버전</div>
+  </div>
+  <div class="streak" id="streakBadge">연속 0회 연습 중</div>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('practice')">🎤 연습하기</button>
+  <button class="tab" onclick="showTab('progress')">📊 내 기록</button>
+  <button class="tab" onclick="showTab('rubric')">📋 평가기준</button>
+</div>
+
+<!-- 연습하기 -->
+<div id="tab-practice" class="content active">
+  <div class="notice">✅ <strong>API 없이 무료로 사용 가능한 버전이에요!</strong><br>원고를 입력하고 녹음하면 발음·유창성을 자동 분석해 드려요.<br>🔴 녹음 시작 후 말하고 ⏹ 중지하면 분석이 시작돼요.</div>
+  <div class="card">
+    <div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+      <div style="flex:1;min-width:180px">
+        <div class="lbl">📝 발표 스크립트 (선생님이 주신 원고) <span style="color:#EF4444">*필수</span></div>
+        <textarea id="scriptInput" placeholder="여기에 발표할 영어 원고를 붙여넣으세요...
+예) Hello everyone. My name is Jimin and today I will talk about my favorite season..."></textarea>
+      </div>
+      <div>
+        <div class="lbl">🎯 합격 기준 점수</div>
+        <div class="flex"><input type="number" id="passScore" value="75" min="0" max="100"><span style="font-size:13px;color:#64748B">점</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="lbl">🎙️ 발음 녹음 또는 직접 입력</div>
+    <div class="record-area" id="recordArea">
+      <div id="recordIdle">
+        <div style="font-size:28px;margin-bottom:8px">🎙️</div>
+        <p style="font-size:13px;color:#64748B;margin-bottom:11px">마이크 버튼을 눌러 말하기 시작하세요<br><span style="font-size:11px;color:#94A3B8">크롬(Chrome) 브라우저 권장 · 마이크 권한 허용 필요</span></p>
+        <div class="flex" style="justify-content:center">
+          <button class="btn btn-red" onclick="startRecording()">🔴 녹음 시작</button>
+          <span style="font-size:12px;color:#94A3B8">또는</span>
+          <button class="btn btn-out" onclick="toggleManual()">✍️ 직접 입력</button>
+        </div>
+      </div>
+      <div id="recordActive" class="hidden">
+        <div class="wave" id="waveViz"></div>
+        <p style="font-size:13px;color:#EF4444;margin:7px 0;font-weight:500">녹음 중... <span id="recTime">0</span>초</p>
+        <button class="btn btn-out" onclick="stopRecording()">⏹ 녹음 중지 및 분석</button>
+      </div>
+    </div>
+    <div id="transcriptArea" class="hidden">
+      <div class="lbl">📋 인식된 텍스트</div>
+      <div class="transcript-box" id="transcriptText"></div>
+    </div>
+    <div id="manualArea" class="hidden" style="margin-top:8px">
+      <div class="lbl">✍️ 직접 말한 내용 입력</div>
+      <textarea id="manualTranscript" placeholder="말한 내용을 영어로 입력해 주세요..."></textarea>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-pri" id="analyzeBtn" onclick="analyze()">🔍 발음 분석하기</button>
+    <button class="btn btn-out" onclick="resetPractice()">🔄 다시 연습</button>
+  </div>
+  <div id="loadingDiv" class="card hidden">
+    <div class="loading">
+      <div class="spinner"></div>
+      <p style="font-size:13px;color:#64748B;text-align:center;line-height:1.7">발음을 분석하고 있습니다...<br>잠시만 기다려주세요 ✨</p>
+    </div>
+  </div>
+  <div id="resultDiv" class="hidden"></div>
+</div>
+
+<!-- 내 기록 -->
+<div id="tab-progress" class="content">
+  <div class="card">
+    <div class="section-title">📈 점수 변화 추이</div>
+    <div id="chartArea"><div class="empty"><div class="ico">📊</div><p style="font-size:13px;line-height:1.7">아직 기록이 없어요.<br>연습하고 나면 점수 변화를 여기서 볼 수 있어요!</p></div></div>
+  </div>
+  <div class="card">
+    <div class="section-title">🗂 최근 시도 기록</div>
+    <div id="historyList"><div class="empty"><div class="ico">🎤</div><p style="font-size:13px">아직 기록이 없어요.</p></div></div>
+    <div style="margin-top:8px;text-align:right">
+      <button onclick="clearHistory()" style="background:none;border:1px solid #EF4444;color:#EF4444;border-radius:6px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit">🗑 기록 삭제</button>
+    </div>
+  </div>
+</div>
+
+<!-- 평가기준 -->
+<div id="tab-rubric" class="content">
+  <div class="card">
+    <div class="section-title">📋 평가 영역 및 기준</div>
+    <div style="padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid #E2E8F0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:500;font-size:13px">🔤 분절음 (Segmental)</span><span class="tag tag-b">30점</span></div>
+      <div style="font-size:12px;color:#64748B;line-height:1.7">개별 자음/모음 정확도, 단어 강세 위치, 묵음 처리, 연음 처리 등을 평가합니다.</div>
+    </div>
+    <div style="padding-bottom:11px;margin-bottom:11px;border-bottom:1px solid #E2E8F0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:500;font-size:13px">🎵 초분절음 (Suprasegmental)</span><span class="tag tag-b">40점</span></div>
+      <div style="font-size:12px;color:#64748B;line-height:1.7">문장 억양 패턴, 발화 리듬, 강조 단어, 말하는 속도(WPM), 끊어 읽기 등을 평가합니다.</div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-weight:500;font-size:13px">💬 유창성 (Fluency)</span><span class="tag tag-b">30점</span></div>
+      <div style="font-size:12px;color:#64748B;line-height:1.7">머뭇거림 횟수, filler word 사용, 자연스러운 발화 흐름, 자신감을 평가합니다.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">🎯 점수 등급표</div>
+    <div class="rubric-row"><span>90 – 100점</span><span class="tag tag-g">최우수 ★★★</span></div>
+    <div class="rubric-row"><span>75 – 89점</span><span class="tag tag-b">우수 (합격)</span></div>
+    <div class="rubric-row"><span>60 – 74점</span><span class="tag tag-y">보통 (재도전)</span></div>
+    <div class="rubric-row"><span>0 – 59점</span><span class="tag tag-r">미흡 (집중 필요)</span></div>
+  </div>
+  <div class="card">
+    <div class="section-title">💡 연습 팁</div>
+    <ul class="tip-list">
+      <li><span>💡</span><span>모델링 스크립트의 노란 단어를 크고 길게, 파란 ↗는 올리고, 보라 ↘는 내려서 읽으세요.</span></li>
+      <li><span>💡</span><span>단어 강세 카드의 🔊 버튼으로 원어민 발음을 듣고 따라해 보세요.</span></li>
+      <li><span>💡</span><span>| 포즈 마커에서 잠깐 호흡하고 이어서 말하세요.</span></li>
+      <li><span>💡</span><span>um, uh 같은 간투사 없이 말하는 연습을 하세요.</span></li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// 상수 & 데이터
+// ══════════════════════════════════════════════════════════
+const SOUND_RULES=[
+  {sound:'/θ/ /ð/',regex:/\b(the|this|that|these|those|there|their|they|think|thought|thank|three|through|throw|thin|thick|thing|things|both|with|math|mouth|teeth|truth|youth|breath)\b/gi,
+   tip:'혀끝을 윗니 사이에 살짝 넣고 바람을 불어내세요.',korean:'ㅅ 또는 ㄷ으로 발음하는 경향이 있어요'},
+  {sound:'/r/',regex:/\b(right|really|read|run|rain|room|road|river|real|remember|reason|rather|result|great|bring|pretty|around|every|story)\b/gi,
+   tip:'혀를 어디에도 닿지 않게 들어올린 채 발음하세요.',korean:'ㄹ처럼 혀가 천장에 닿지 않도록 주의하세요'},
+  {sound:'/l/',regex:/\b(love|like|late|long|light|little|live|look|feel|fall|call|well|will|still|tell|all|old|help|world|real|really|local|school|full|pull|place|people)\b/gi,
+   tip:'혀끝을 윗니 바로 뒤쪽 천장에 붙이고 발음하세요.',korean:'ㄹ과 ㅇ 사이로 발음하는 경향이 있어요'},
+  {sound:'/f/ /v/',regex:/\b(favorite|feel|find|first|food|for|from|have|love|very|visit|voice|over|every|never|above|believe|give|leave|five|of|life|five|flower)\b/gi,
+   tip:'윗니로 아랫입술을 살짝 물고 바람을 불어내세요.',korean:'ㅍ/ㅂ으로 발음하는 경향이 있어요'},
+];
+const STRESS_DB={
+  'beautiful':'BEA-u-ti-ful','important':'im-POR-tant','favorite':'FAV-rite',
+  'interesting':'IN-ter-est-ing','comfortable':'COM-for-ta-ble','different':'DIF-fer-ent',
+  'understand':'un-der-STAND','together':'to-GETH-er','remember':'re-MEM-ber',
+  'because':'be-CAUSE','about':'a-BOUT','today':'to-DAY','tomorrow':'to-MOR-row',
+  'yesterday':'YES-ter-day','family':'FAM-i-ly','everyone':'EV-ery-one',
+  'something':'SOME-thing','everything':'EV-ery-thing','another':'a-NOTH-er',
+  'afternoon':'af-ter-NOON','morning':'MOR-ning','evening':'EVE-ning',
+  'holiday':'HOL-i-day','celebrate':'CEL-e-brate','especially':'es-PEC-ial-ly',
+  'university':'u-ni-VER-si-ty','opportunity':'op-por-TU-ni-ty',
+  'environment':'en-VI-ron-ment','communication':'com-mu-ni-CA-tion',
+  'presentation':'pres-en-TA-tion','experience':'ex-PE-ri-ence',
+  'absolutely':'AB-so-lute-ly','wonderful':'WON-der-ful','terrible':'TER-ri-ble',
+  'excellent':'EX-cel-lent','however':'how-EV-er','although':'al-THOUGH',
+  'weather':'WEATH-er','season':'SEA-son','spring':'SPRING','summer':'SUM-mer',
+  'autumn':'AU-tumn','winter':'WIN-ter','flower':'FLOW-er','pleasant':'PLEAS-ant',
+  'people':'PEO-ple','never':'NEV-er','always':'AL-ways','often':'OF-ten',
+  'really':'REAL-ly','maybe':'MAY-be','already':'al-REA-dy','again':'a-GAIN',
+  'between':'be-TWEEN','without':'with-OUT','around':'a-ROUND','before':'be-FORE',
+  'enjoy':'en-JOY','believe':'be-LIEVE','prepare':'pre-PARE','decide':'de-CIDE',
+  'happen':'HAP-pen','follow':'FOL-low','become':'be-COME','include':'in-CLUDE',
+};
+const FILLERS=['um','uh','er','ah','like','you know','i mean','basically','literally','actually','so','well','okay','right','hmm'];
+const CONTENT_WORDS=new Set([
+  'love','like','enjoy','feel','think','know','see','want','need','hate',
+  'beautiful','wonderful','amazing','great','good','bad','happy','sad','excited','surprised',
+  'spring','summer','fall','winter','warm','cold','hot','cool','rain','snow','sun',
+  'flower','flowers','tree','sky','season','favorite','best','worst','time','day',
+  'year','world','life','people','friend','family','school','home','name','talk',
+  'tell','show','today','everyone','absolutely','bloom','pleasant','agree','weather',
+  'becomes','speak','present','important','interesting','different','special','wonderful',
+  'love','favorite','beautiful','amazing','perfect','excellent','terrible',
+]);
+// 절을 시작하는 접속사/종속접속사 (앞에서 ↗, 이 절 끝에서 ↘)
+const SUBORDINATORS=new Set(['because','although','though','while','since','when','if','unless','whereas','after','before','until','whereas']);
+// 등위접속사 (앞 절 끝에 ↗ or ↘)
+const COORDINATORS=new Set(['and','but','or','so','yet','for','nor']);
+
+// ══════════════════════════════════════════════════════════
+// 모델링 스크립트 생성기 (핵심 개선)
+// ══════════════════════════════════════════════════════════
+function generateModeling(script){
+  if(!script) return '';
+
+  // 문장 분리 (마침표/느낌표/물음표 기준)
+  const rawSentences=[];
+  let buf='';
+  for(const ch of script.trim()){
+    buf+=ch;
+    if('.!?'.includes(ch)){rawSentences.push(buf.trim());buf='';}
+  }
+  if(buf.trim()) rawSentences.push(buf.trim());
+
+  const lines=[];
+
+  rawSentences.slice(0,5).forEach(sent=>{
+    const isQuestion=sent.endsWith('?');
+
+    // 단어+구두점 토큰으로 분리
+    const tokens=sent.match(/[a-zA-Z']+|[.,!?;:]/g)||[];
+
+    let phraseTokens=[];
+    let isFirstInSent=true;
+
+    const flushPhrase=(arrow,pause=false)=>{
+      if(phraseTokens.length===0) return;
+      const marked=phraseTokens.map((t,i)=>{
+        if(/^[a-zA-Z']/.test(t)){
+          const lower=t.toLowerCase();
+          if(CONTENT_WORDS.has(lower)||(isFirstInSent&&i===0)){
+            isFirstInSent=false;
+            return t.charAt(0).toUpperCase()===t.charAt(0)&&t===t.toUpperCase()
+              ? t  // 이미 대문자
+              : lower.toUpperCase();
+          }
+          isFirstInSent=false;
+          // 문장 첫 단어는 원형 그대로
+          return t;
+        }
+        return t;
+      });
+      lines.push(marked.join(' ')+(pause?' |':'')+' '+arrow);
+      phraseTokens=[];
+    };
+
+    for(let i=0;i<tokens.length;i++){
+      const tok=tokens[i];
+      const lower=tok.toLowerCase();
+      const isSub=SUBORDINATORS.has(lower);
+      const isCoord=COORDINATORS.has(lower);
+      const isPunct=/^[.,!?;:]$/.test(tok);
+
+      if(isPunct){
+        // 구두점을 마지막 단어에 붙이기
+        if(phraseTokens.length>0) phraseTokens[phraseTokens.length-1]+=tok;
+
+        if(tok===','){
+          // 쉼표: 다음 단어 확인
+          const nextWord=tokens.slice(i+1).find(t=>/[a-z]/i.test(t));
+          const nextLow=nextWord?nextWord.toLowerCase():'';
+          const nextIsSub=SUBORDINATORS.has(nextLow);
+          const nextIsCoord=COORDINATORS.has(nextLow);
+          // 쉼표 뒤 접속사 → ↗ (계속됨을 의미)
+          flushPhrase('↗', false);
+        } else if('.!?'.includes(tok)){
+          flushPhrase(isQuestion?'↗':'↘', false);
+          isFirstInSent=true;
+        } else if(tok===';'){
+          flushPhrase('↗', true);
+        }
+      } else if(isSub){
+        // 종속접속사: 앞 절을 ↗로 끊고 새 절 시작
+        if(phraseTokens.length>0) flushPhrase('↗', false);
+        phraseTokens.push(tok);
+      } else if(isCoord && phraseTokens.length>3){
+        // 등위접속사이고 앞 절이 충분히 길면: 포즈 후 새 절
+        flushPhrase('↘', true);
+        phraseTokens.push(tok);
+      } else {
+        phraseTokens.push(tok);
+      }
+    }
+    if(phraseTokens.length>0) flushPhrase(isQuestion?'↗':'↘');
+  });
+
+  return lines.join('\n');
+}
+
+// ══════════════════════════════════════════════════════════
+// 모델링 스크립트 렌더러 (완전 재작성)
+// ══════════════════════════════════════════════════════════
+const SVG_UP=`<svg width="13" height="13" viewBox="0 0 20 20" fill="none" style="display:inline-block;vertical-align:middle"><path d="M4 15 L15 5 M15 5 H8 M15 5 V12" stroke="#1D4ED8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const SVG_DOWN=`<svg width="13" height="13" viewBox="0 0 20 20" fill="none" style="display:inline-block;vertical-align:middle"><path d="M5 5 L15 15 M15 15 H8 M15 15 V8" stroke="#6D28D9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+function renderModelingScript(text){
+  if(!text) return '<div style="color:#94A3B8;font-size:13px;padding:10px">모델링 스크립트를 생성할 수 없어요. 스크립트를 입력해 주세요.</div>';
+
+  const rawLines=text.split('\n').filter(l=>l.trim());
+
+  const linesHtml=rawLines.map(line=>{
+    const trimmed=line.trim();
+
+    // 줄 끝 화살표 추출: "words ↗" or "words ↘"
+    const arrowMatch=trimmed.match(/(↗|↘)\s*$/);
+    const arrow=arrowMatch?arrowMatch[1]:null;
+    const phraseText=arrow?trimmed.slice(0,trimmed.lastIndexOf(arrow)).trim():trimmed;
+
+    // 포즈 마커 처리
+    const hasPause=phraseText.includes(' |');
+    const cleanPhrase=phraseText.replace(' |','').trim();
+
+    // 단어 토큰화 (공백 기준, 구두점 분리)
+    const wordTokens=cleanPhrase.match(/[A-Za-z']+[.,!?;:]*|[.,!?;:]+/g)||[];
+
+    let wordsHtml='';
+    wordTokens.forEach((tok,i)=>{
+      // 끝 구두점 분리
+      const trailPunct=tok.match(/[.,!?;:]+$/)?.[0]||'';
+      const wordPart=tok.replace(/[.,!?;:]+$/,'');
+
+      if(!wordPart && trailPunct){
+        wordsHtml+=`<span class="mp">${trailPunct}</span>`;
+        return;
+      }
+
+      if(/^[A-Z]{2,}$/.test(wordPart)){
+        // 강세 단어 (대문자 2글자 이상)
+        wordsHtml+=`<span class="ms">${wordPart}</span>`;
+      } else {
+        // 첫 글자가 대문자인 일반 단어 (문장 첫 단어 등)
+        wordsHtml+=`<span class="mw">${wordPart}</span>`;
+      }
+
+      if(trailPunct) wordsHtml+=`<span class="mp">${trailPunct}</span>`;
+
+      // 다음 토큰이 구두점이 아닐 때만 공백
+      const next=wordTokens[i+1];
+      if(next && !/^[.,!?;:]/.test(next)) wordsHtml+=' ';
+    });
+
+    // 포즈 마커
+    const pauseHtml=hasPause?`<span class="mpause" title="여기서 잠깐 쉬세요">‖</span> `:'';
+
+    // 억양 화살표
+    let arrowHtml='';
+    if(arrow==='↗') arrowHtml=`<span class="mu">${SVG_UP} ↗</span>`;
+    else if(arrow==='↘') arrowHtml=`<span class="md">${SVG_DOWN} ↘</span>`;
+
+    return `<div class="m-line">${wordsHtml.trim()} ${pauseHtml}${arrowHtml}</div>`;
+  }).join('');
+
+  return `<div class="modeling-wrap">${linesHtml}</div>`;
+}
+
+// ══════════════════════════════════════════════════════════
+// 단어 강세 카드 렌더러 (TTS 포함)
+// ══════════════════════════════════════════════════════════
+function renderStressCards(wordIssues){
+  if(!wordIssues.length) return '<div class="fb-box">스크립트에서 강세 연습이 필요한 단어가 감지되지 않았어요 👍</div>';
+  return `
+  <div style="margin-bottom:8px;font-size:12px;color:#64748B">💡 파란색 음절에 강세를 두세요. 🔊 버튼으로 원어민 발음을 듣고 따라해 보세요!</div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px">
+    ${wordIssues.map((w,idx)=>{
+      const parts=w.correct.split('-');
+      const syllHtml=parts.map(p=>{
+        const isS=/^[A-Z]/.test(p);
+        return `<div class="syl-box"><div class="syl-dot ${isS?'strong':'weak'}"></div><div class="syl-t ${isS?'strong':''}">${p}</div></div>`;
+      }).join('');
+      return `<div class="stress-card">
+        <div class="stress-syllables">${syllHtml}</div>
+        <div class="stress-word">${w.word}</div>
+        <button class="tts-btn" id="tts-${idx}" onclick="speakStress('${w.word}',${idx})">🔊 발음 듣기</button>
+        <div class="stress-tip">${w.tip}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+let _ttsBtn=null;
+function speakStress(word,idx){
+  if(!('speechSynthesis'in window)){alert('이 브라우저는 TTS를 지원하지 않아요.');return;}
+  window.speechSynthesis.cancel();
+  if(_ttsBtn){_ttsBtn.classList.remove('playing');_ttsBtn.innerHTML='🔊 발음 듣기';}
+  const btn=document.getElementById('tts-'+idx);
+  btn.classList.add('playing');btn.innerHTML='🔊 재생 중...';_ttsBtn=btn;
+  const u1=new SpeechSynthesisUtterance(word);u1.lang='en-US';u1.rate=0.65;u1.pitch=1.05;
+  const u2=new SpeechSynthesisUtterance(word);u2.lang='en-US';u2.rate=0.9;
+  u2.onend=()=>{btn.classList.remove('playing');btn.innerHTML='🔊 발음 듣기';_ttsBtn=null;};
+  window.speechSynthesis.speak(u1);
+  window.speechSynthesis.speak(u2);
+}
+
+// ══════════════════════════════════════════════════════════
+// 분석 엔진
+// ══════════════════════════════════════════════════════════
+function analyzeRuleBased(transcript,script,recSeconds){
+  const t=transcript.toLowerCase();
+  const words=t.split(/\s+/).filter(w=>w.replace(/[^a-z]/g,'').length>0);
+  const scriptWords=script.toLowerCase().split(/\s+/).filter(w=>w.replace(/[^a-z]/g,'').length>0);
+
+  const foundFillers=FILLERS.filter(f=>new RegExp('\\b'+f.replace(' ','\\s+')+'\\b','gi').test(t));
+  const fillerCount=foundFillers.reduce((a,f)=>{const m=t.match(new RegExp('\\b'+f.replace(' ','\\s+')+'\\b','gi'));return a+(m?m.length:0);},0);
+
+  const wpm=recSeconds>5?Math.round(words.length/(recSeconds/60)):0;
+  const wpmIdeal=wpm>=110&&wpm<=160;
+  const wpmFeedback=wpm===0?'속도를 측정하지 못했어요 (직접 입력 모드).':
+    wpm<80?`현재 ${wpm} WPM — 너무 느려요. 자신감 있게 조금 더 빠르게 말해보세요.`:
+    wpm<110?`현재 ${wpm} WPM — 살짝 느린 편이에요.`:
+    wpm<=160?`현재 ${wpm} WPM — 적절한 속도예요! 잘하고 있어요.`:
+    `현재 ${wpm} WPM — 너무 빠른 편이에요.`;
+
+  let matchCount=0;
+  scriptWords.forEach(sw=>{if(words.includes(sw.replace(/[^a-z]/g,'')))matchCount++;});
+  const accuracy=scriptWords.length>0?matchCount/scriptWords.length:0.7;
+
+  let fluScore=Math.round(80-Math.min(fillerCount*5,30)+(wpmIdeal?10:0)+(accuracy*15));
+  fluScore=Math.max(30,Math.min(100,fluScore));
+
+  const foundSounds=[];
+  SOUND_RULES.forEach(rule=>{
+    const m=(script+' '+t).match(rule.regex);
+    if(m&&m.length>0){
+      const uniq=[...new Set(m.map(x=>x.toLowerCase()))].slice(0,3);
+      foundSounds.push({sound:rule.sound,examples:uniq,tip:rule.tip,koreanEquivalent:rule.korean});
+    }
+  });
+
+  const wordIssues=[];
+  [...new Set((script+' '+t).toLowerCase().split(/\s+/).map(w=>w.replace(/[^a-z]/g,'')))].forEach(w=>{
+    if(STRESS_DB[w])wordIssues.push({word:w,correct:STRESS_DB[w],tip:'강세 음절을 더 높고 길게 발음하세요.'});
+  });
+
+  let segScore=Math.round(75-Math.min(foundSounds.length*4,20)+(accuracy*20));
+  segScore=Math.max(30,Math.min(100,segScore));
+
+  const sentCount=(t.match(/[.!?]+/g)||[]).length||1;
+  const rhythmGood=words.length/sentCount>=8&&words.length/sentCount<=20;
+  let supraScore=Math.round(65+(rhythmGood?10:0)+(wpmIdeal?10:0)+(accuracy*10));
+  supraScore=Math.max(30,Math.min(100,supraScore));
+
+  const overall=Math.round(segScore*0.3+supraScore*0.4+fluScore*0.3);
+  const passScore=parseInt(document.getElementById('passScore').value)||75;
+
+  const tips=[];
+  if(fillerCount>2)tips.push(`"${foundFillers.slice(0,2).join('", "')}" 같은 간투사를 줄여보세요.`);
+  if(wpm>0&&wpm<100)tips.push('말하는 속도를 조금 올려보세요.');
+  if(wpm>160)tips.push('너무 빠르게 말하고 있어요. 중요한 단어에서 잠깐 천천히 말해보세요.');
+  if(accuracy<0.7)tips.push('원고를 더 정확하게 암기해보세요.');
+  tips.push('내용어(명사, 동사, 형용사)는 크고 길게, 기능어(관사, 전치사)는 빠르게 말하세요.');
+  if(tips.length<3)tips.push('모델링 스크립트의 억양 화살표 방향을 따라 연습해 보세요.');
+
+  const diff=[];
+  const spoken=new Set(words.map(w=>w.replace(/[^a-z]/g,'')));
+  scriptWords.slice(0,50).forEach(w=>diff.push({word:w,ok:spoken.has(w.replace(/[^a-z]/g,''))}));
+
+  return{
+    overallScore:overall,
+    segmental:{score:segScore,problemSounds:foundSounds.slice(0,4),wordLevelIssues:wordIssues.slice(0,5)},
+    suprasegmental:{
+      score:supraScore,
+      intonation:{rating:supraScore>=75?'양호':supraScore>=60?'보통':'개선 필요',
+        feedback:accuracy<0.6?'스크립트와 많이 다르게 말한 것 같아요. 원고를 충분히 암기한 후 다시 연습해보세요.':'평서문 끝은 ↘, 의문문 끝은 ↗으로 끝나도록 연습해 보세요.'},
+      rhythm:{rating:rhythmGood?'양호':'개선 필요',feedback:rhythmGood?'문장 리듬이 자연스러워요.':'자연스러운 호흡 단위로 말해보세요.'},
+      stress:{rating:segScore>=70?'보통':'개선 필요',feedback:'중요한 단어(명사, 동사, 형용사)를 더 강조해서 말해보세요.'},
+      pace:{wpm:wpm||0,ideal:'110-160',feedback:wpmFeedback}
+    },
+    fluency:{
+      score:fluScore,
+      pausePatterns:fillerCount>3?'간투사가 많이 사용됐어요. 막히면 짧게 쉬고 이어서 말하세요.':'쉬는 패턴은 비교적 자연스러워요.',
+      fillerWords:foundFillers,
+      feedback:fillerCount===0?'간투사 없이 잘 말했어요! 유창성이 좋아요.':`"${foundFillers.slice(0,3).join('", "')}" 같은 간투사가 ${fillerCount}번 감지됐어요.`
+    },
+    coachingAdvice:{
+      mood:overall>=80?'정말 훌륭해요! 자신감 있는 발표가 느껴져요. 😊':
+           overall>=65?'잘 하고 있어요! 청중에게 이야기하듯이 말해보세요.':
+           '걱정하지 마세요! 반복 연습이 답이에요. 오늘 3번만 더 읽어보세요 💪',
+      specificTips:tips.slice(0,3),
+      modelingScript:generateModeling(script)||'HELLO EVERYONE ↗\nMy NAME is Jimin ↘\nand TODAY I will TALK about my FAVORITE season ↘'
+    },
+    passThreshold:{required:passScore,achieved:overall>=passScore},
+    diff,accuracy:Math.round(accuracy*100)
+  };
+}
+
+// ══════════════════════════════════════════════════════════
+// UI
+// ══════════════════════════════════════════════════════════
+let recognition=null,recTimer=null,recSeconds=0,currentTranscript='';
+
+function showTab(name){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  ['practice','progress','rubric'].forEach((n,i)=>{if(n===name)document.querySelectorAll('.tab')[i].classList.add('active');});
+  if(name==='progress')renderProgress();
+}
+function startRecording(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('크롬(Chrome) 브라우저를 사용해 주세요!');toggleManual();return;}
+  recognition=new SR();recognition.lang='en-US';recognition.continuous=true;recognition.interimResults=true;
+  currentTranscript='';recSeconds=0;
+  recognition.onresult=e=>{
+    let i='',f='';
+    for(let j=e.resultIndex;j<e.results.length;j++){if(e.results[j].isFinal)f+=e.results[j][0].transcript;else i+=e.results[j][0].transcript;}
+    currentTranscript+=f;
+    document.getElementById('transcriptText').textContent=currentTranscript+i;
+    document.getElementById('transcriptArea').classList.remove('hidden');
+  };
+  recognition.onerror=err=>{
+    if(err.error==='not-allowed')alert('마이크 권한을 허용해 주세요!');
+    stopRecording();toggleManual();
+  };
+  recognition.start();
+  document.getElementById('recordArea').classList.add('rec-on');
+  document.getElementById('recordIdle').classList.add('hidden');
+  document.getElementById('recordActive').classList.remove('hidden');
+  buildWave();
+  recTimer=setInterval(()=>{recSeconds++;document.getElementById('recTime').textContent=recSeconds;},1000);
+}
+function stopRecording(){
+  if(recognition){recognition.stop();recognition=null;}
+  clearInterval(recTimer);
+  document.getElementById('recordArea').classList.remove('rec-on');
+  document.getElementById('recordIdle').classList.remove('hidden');
+  document.getElementById('recordActive').classList.add('hidden');
+}
+function buildWave(){
+  const w=document.getElementById('waveViz');w.innerHTML='';
+  [40,70,90,60,100,70,80,50].forEach((h,i)=>{
+    const b=document.createElement('div');b.className='wave-bar';
+    b.style.cssText=`height:${h}%;animation:wv 0.7s ease-in-out ${i*0.1}s infinite alternate`;w.appendChild(b);
+  });
+}
+function toggleManual(){document.getElementById('manualArea').classList.toggle('hidden');}
+function getTranscript(){return document.getElementById('manualTranscript').value.trim()||currentTranscript.trim();}
+
+function analyze(){
+  const t=getTranscript(),script=document.getElementById('scriptInput').value.trim();
+  if(!script){alert('📝 발표 스크립트를 먼저 입력해 주세요!');return;}
+  if(!t){alert('🎙️ 먼저 녹음하거나 ✍️ 직접 입력해 주세요!');return;}
+  document.getElementById('loadingDiv').classList.remove('hidden');
+  document.getElementById('resultDiv').classList.add('hidden');
+  document.getElementById('analyzeBtn').disabled=true;
+  setTimeout(()=>{
+    const r=analyzeRuleBased(t,script,recSeconds);
+    saveAttempt(r);showResult(r);
+    document.getElementById('loadingDiv').classList.add('hidden');
+    document.getElementById('analyzeBtn').disabled=false;
+  },800);
+}
+
+// ══════════════════════════════════════════════════════════
+// 결과 렌더링
+// ══════════════════════════════════════════════════════════
+const sc=s=>s>=75?'#10B981':s>=60?'#F59E0B':'#EF4444';
+const tagC=s=>s>=75?'tag-g':s>=60?'tag-y':'tag-r';
+const tagL=s=>s>=75?'합격':s>=60?'보통':'미흡';
+
+function showResult(r){
+  const{segmental:seg,suprasegmental:sup,fluency:flu,coachingAdvice:coach}=r;
+  const pass=r.passThreshold.achieved,pct=r.overallScore;
+  const circ=2*Math.PI*45,offset=circ-(circ*pct/100);
+
+  let diffHtml='';
+  if(r.diff&&r.diff.length>0){
+    diffHtml=`<div class="card"><div class="section-title">📋 원고 비교 분석</div>
+    <div style="font-size:12px;color:#64748B;margin-bottom:8px">원고 대비 정확도: <strong style="color:${sc(r.accuracy)}">${r.accuracy}%</strong></div>
+    <div style="font-size:13px;line-height:2.2;background:#F8FAFC;border-radius:8px;padding:11px">
+    ${r.diff.map(d=>d.ok?`<span style="margin:0 2px">${d.word}</span>`:`<span class="diff-del">${d.word}</span>`).join(' ')}
+    </div>
+    <div style="font-size:11px;color:#94A3B8;margin-top:6px"><span class="diff-del">취소선</span> = 원고에 있지만 인식 안 된 단어</div></div>`;
+  }
+
+  const html=`
+  <div class="pass-banner ${pass?'pass':'fail'}">
+    <h2>${pass?'🎉 합격!':'💪 조금 더 연습이 필요해요'}</h2>
+    <p style="font-size:12px;color:#64748B">${pass?`목표 ${r.passThreshold.required}점 달성! 정말 잘했어요!`:`현재 ${pct}점 / 목표 ${r.passThreshold.required}점. 포기하지 마세요!`}</p>
+  </div>
+  <div class="card">
+    <div class="section-title">📊 종합 점수</div>
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+      <div class="score-wrap">
+        <svg width="110" height="110" style="transform:rotate(-90deg)">
+          <circle cx="55" cy="55" r="45" fill="none" stroke="#E2E8F0" stroke-width="10"/>
+          <circle cx="55" cy="55" r="45" fill="none" stroke="${sc(pct)}" stroke-width="10" stroke-linecap="round"
+            stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/>
+        </svg>
+        <div class="score-inner">
+          <div style="font-size:26px;font-weight:700;color:${sc(pct)};font-family:monospace">${pct}</div>
+          <div style="font-size:10px;color:#64748B">/ 100점</div>
+        </div>
+      </div>
+      <div style="flex:1;min-width:160px">
+        ${[{l:'🔤 분절음',s:seg.score},{l:'🎵 초분절음',s:sup.score},{l:'💬 유창성',s:flu.score}].map(c=>`
+          <div style="margin-bottom:9px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+              <span style="color:#64748B">${c.l}</span><span style="font-weight:600;color:${sc(c.s)}">${c.s}점</span>
+            </div>
+            <div class="pbar-wrap"><div class="pbar-fill" style="width:${c.s}%;background:${sc(c.s)}"></div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>
+  ${diffHtml}
+  <div class="card">
+    <div class="section-title">🔤 발음 분석 (분절음)</div>
+    <div style="display:flex;gap:7px;align-items:center;margin-bottom:10px">
+      <span style="font-size:20px;font-weight:700;color:${sc(seg.score)}">${seg.score}점</span>
+      <span class="tag ${tagC(seg.score)}">${tagL(seg.score)}</span>
+    </div>
+    ${seg.problemSounds.length?`
+    <div style="margin-bottom:14px">
+      <div class="lbl">⚠️ 스크립트에서 발견된 어려운 발음</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px">
+        ${seg.problemSounds.map(s=>`<div class="sound-card">
+          <div class="ipa">${s.sound}</div>
+          <div style="font-size:11px;color:#64748B;margin:2px 0">${s.examples.join(', ')}</div>
+          <div style="font-size:11px;margin-top:4px;line-height:1.5;color:#1E293B">${s.tip}</div>
+          <div style="font-size:10px;color:#94A3B8;margin-top:3px">💡 ${s.koreanEquivalent}</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+    <div>
+      <div class="lbl">📝 단어 강세 연습 <span style="color:#4F46E5;font-weight:600">(🔊 버튼으로 발음 들어보기)</span></div>
+      ${renderStressCards(seg.wordLevelIssues)}
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">🎵 억양 & 리듬 (초분절음)</div>
+    <div style="display:flex;gap:7px;align-items:center;margin-bottom:10px">
+      <span style="font-size:20px;font-weight:700;color:${sc(sup.score)}">${sup.score}점</span>
+      <span class="tag ${tagC(sup.score)}">${tagL(sup.score)}</span>
+    </div>
+    <div class="grid2" style="margin-bottom:10px">
+      ${[{icon:'🎶',label:'억양',data:sup.intonation},{icon:'🥁',label:'리듬',data:sup.rhythm},
+         {icon:'💪',label:'강세',data:sup.stress},{icon:'⏱',label:'속도',data:{rating:`${sup.pace.wpm>0?sup.pace.wpm+' WPM':'측정중'}`,feedback:sup.pace.feedback}}
+      ].map(item=>`<div class="fb-box"><div style="font-weight:600;margin-bottom:4px;color:#1E293B">${item.icon} ${item.label}
+        <span class="tag tag-y" style="margin-left:4px;font-size:10px;padding:1px 6px">${item.data.rating}</span></div>
+        <div>${item.data.feedback}</div></div>`).join('')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">💬 유창성 분석</div>
+    <div style="display:flex;gap:7px;align-items:center;margin-bottom:10px">
+      <span style="font-size:20px;font-weight:700;color:${sc(flu.score)}">${flu.score}점</span>
+      <span class="tag ${tagC(flu.score)}">${tagL(flu.score)}</span>
+    </div>
+    <div class="fb-box" style="margin-bottom:7px">${flu.feedback}</div>
+    ${flu.fillerWords.length?`<div style="font-size:12px;color:#64748B;margin-bottom:5px">🚫 감지된 간투사: ${flu.fillerWords.map(f=>`<span class="tag tag-r" style="margin:0 3px;font-size:11px;padding:2px 8px">${f}</span>`).join('')}</div>`:''}
+    <div style="font-size:12px;color:#64748B">⏸ ${flu.pausePatterns}</div>
+  </div>
+  <div class="card">
+    <div class="section-title">🎓 코치 조언 & 모델링 스크립트</div>
+    <div style="font-size:13px;line-height:1.7;background:#F8FAFC;border-radius:8px;padding:11px;border-left:3px solid #4F46E5;color:#1E293B;margin-bottom:12px">${coach.mood}</div>
+    <div class="lbl">✅ 구체적인 연습 방법</div>
+    <ul class="tip-list" style="margin-bottom:16px">
+      ${coach.specificTips.map(t=>`<li><span>💡</span><span>${t}</span></li>`).join('')}
+    </ul>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:7px">
+      <div class="lbl" style="margin:0;font-size:13px;font-weight:700;color:#1E293B">🎯 모델링 스크립트</div>
+      <button class="btn btn-out btn-sm" onclick="speakModeling()">🔊 전체 듣기</button>
+    </div>
+    <div class="modeling-legend">
+      <div class="li"><span class="ms" style="font-size:11px;padding:1px 7px">WORD</span><span>강세 강조</span></div>
+      <div class="li"><span class="mu" style="font-size:11px;padding:2px 8px">${SVG_UP} ↗</span><span>올라가는 억양</span></div>
+      <div class="li"><span class="md" style="font-size:11px;padding:2px 8px">${SVG_DOWN} ↘</span><span>내려가는 억양</span></div>
+      <div class="li"><span class="mpause">‖</span><span>포즈 (잠깐 쉬기)</span></div>
+    </div>
+    ${renderModelingScript(coach.modelingScript)}
+    <div style="margin-top:10px;background:#EEF2FF;border-radius:8px;padding:9px 13px;font-size:12px;color:#3730A3;line-height:1.8">
+      💡 <strong>연습법:</strong> 노란 단어는 크고 길게 · 파란 ↗ 목소리 올리기 · 보라 ↘ 목소리 내리기 · ‖ 에서 잠깐 쉬기
+    </div>
+  </div>`;
+
+  const div=document.getElementById('resultDiv');
+  div.innerHTML=html;div.classList.remove('hidden');
+  window._modelingText=coach.modelingScript;
+  updateStreak();
+}
+
+function speakModeling(){
+  if(!window._modelingText)return;
+  if(!('speechSynthesis'in window)){alert('이 브라우저는 TTS를 지원하지 않아요.');return;}
+  window.speechSynthesis.cancel();
+  const clean=window._modelingText.replace(/[↗↘‖|]/g,'').replace(/\n/g,' ').replace(/\s+/g,' ');
+  const u=new SpeechSynthesisUtterance(clean);u.lang='en-US';u.rate=0.82;
+  window.speechSynthesis.speak(u);
+}
+
+function resetPractice(){
+  currentTranscript='';recSeconds=0;stopRecording();
+  document.getElementById('transcriptArea').classList.add('hidden');
+  document.getElementById('transcriptText').textContent='';
+  document.getElementById('manualTranscript').value='';
+  document.getElementById('resultDiv').classList.add('hidden');
+  document.getElementById('loadingDiv').classList.add('hidden');
+  document.getElementById('analyzeBtn').disabled=false;
+  window.scrollTo(0,0);
+}
+function saveAttempt(r){
+  const h=JSON.parse(localStorage.getItem('speechPractice_history')||'[]');
+  h.push({timestamp:new Date().toISOString(),overallScore:r.overallScore,segScore:r.segmental.score,supraScore:r.suprasegmental.score,fluScore:r.fluency.score,passed:r.passThreshold.achieved});
+  localStorage.setItem('speechPractice_history',JSON.stringify(h));
+  updateStreak();
+}
+function updateStreak(){
+  const h=JSON.parse(localStorage.getItem('speechPractice_history')||'[]');
+  document.getElementById('streakBadge').textContent=`연속 ${h.length}회 연습 중`;
+}
+function renderProgress(){
+  const h=JSON.parse(localStorage.getItem('speechPractice_history')||'[]');
+  if(!h.length)return;
+  const best=Math.max(...h.map(x=>x.overallScore));
+  const W=560,H=180,P=40,n=h.length;
+  const yS=v=>H-P-((v/100)*(H-P*1.5));
+  const pts=k=>h.map((x,i)=>`${n===1?W/2:P+i*(W-P*2)/(n-1)},${yS(x[k])}`);
+  const line=(k,c,d='')=>`<polyline points="${pts(k).join(' ')}" fill="none" stroke="${c}" stroke-width="${k==='overallScore'?2.5:1.5}" stroke-dasharray="${d}" stroke-linejoin="round"/>
+    ${h.map((x,i)=>`<circle cx="${n===1?W/2:P+i*(W-P*2)/(n-1)}" cy="${yS(x[k])}" r="${k==='overallScore'?4:3}" fill="${c}"/>`).join('')}`;
+  const lbs=h.map((x,i)=>`<text x="${n===1?W/2:P+i*(W-P*2)/(n-1)}" y="${H-5}" text-anchor="middle" font-size="11" fill="#94A3B8">${i+1}회</text>`).join('');
+  const yl=[0,25,50,75,100].map(v=>`<line x1="${P}" y1="${yS(v)}" x2="${W-P}" y2="${yS(v)}" stroke="#E2E8F0" stroke-width="1"/><text x="${P-5}" y="${yS(v)+4}" text-anchor="end" font-size="10" fill="#94A3B8">${v}</text>`).join('');
+  document.getElementById('chartArea').innerHTML=`
+    <svg width="100%" viewBox="0 0 ${W} ${H}" style="overflow:visible">${yl}${lbs}${line('overallScore','#4F46E5')}${line('segScore','#10B981','4 3')}${line('supraScore','#F59E0B','4 3')}${line('fluScore','#EF4444','4 3')}</svg>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:12px;color:#64748B">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:#4F46E5;display:inline-block;border-radius:2px"></span>종합</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:#10B981;display:inline-block;border-radius:2px"></span>분절음</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:#F59E0B;display:inline-block;border-radius:2px"></span>초분절음</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:3px;background:#EF4444;display:inline-block;border-radius:2px"></span>유창성</span>
+    </div>
+    ${best>0?`<div style="margin-top:9px;background:#FEF3C7;border-radius:8px;padding:7px 13px;font-size:13px;color:#92400E;font-weight:500">🏆 개인 최고 기록: <strong>${best}점</strong></div>`:''}`;
+  document.getElementById('historyList').innerHTML=[...h].reverse().slice(0,5).map((x,i)=>{
+    const d=new Date(x.timestamp),ds=d.toLocaleDateString('ko-KR',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}),isB=x.overallScore===best;
+    return `<div class="attempt-row"><div><div style="font-weight:500;font-size:13px;display:flex;align-items:center;gap:6px">${ds}${isB?'<span class="best-badge">최고기록!</span>':''}</div>
+    <div style="font-size:11px;color:#94A3B8;margin-top:1px">${x.passed?'✅ 합격':'❌ 미달'} · 분절음${x.segScore}·초분절음${x.supraScore}·유창성${x.fluScore}</div></div>
+    <div style="font-size:19px;font-weight:700;color:${sc(x.overallScore)}">${x.overallScore}점</div></div>`;
+  }).join('');
+}
+function clearHistory(){
+  if(confirm('모든 연습 기록을 삭제할까요?')){
+    localStorage.removeItem('speechPractice_history');updateStreak();
+    document.getElementById('chartArea').innerHTML='<div class="empty"><div class="ico">📊</div><p style="font-size:13px">아직 기록이 없어요.</p></div>';
+    document.getElementById('historyList').innerHTML='<div class="empty"><div class="ico">🎤</div><p style="font-size:13px">아직 기록이 없어요.</p></div>';
+  }
+}
+updateStreak();
+</script>
+</body>
+</html>
